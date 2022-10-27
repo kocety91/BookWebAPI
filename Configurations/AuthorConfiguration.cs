@@ -10,7 +10,9 @@ namespace BookWebAPI.Configurations
         {
             builder.Property(x => x.FirstName).HasMaxLength(15).IsRequired();
             builder.Property(x => x.LastName).HasMaxLength(15).IsRequired();
-            builder.HasMany(x => x.Books).WithOne(b => b.Author).OnDelete(DeleteBehavior.Restrict);
+            builder.HasMany(x => x.Books).WithOne(b => b.Author)
+                .HasForeignKey(b => b.AuthorId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

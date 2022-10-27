@@ -16,8 +16,6 @@ namespace BookWebAPI.Data
 
         public virtual DbSet<Book> Books { get; set; }
 
-        public virtual DbSet<BooksGenres> BooksGenres { get; set; }
-
         public virtual DbSet<Genre> Genres { get; set; }
 
         public virtual DbSet<Publisher> Publishers { get; set; }

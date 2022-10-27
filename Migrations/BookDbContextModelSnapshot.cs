@@ -69,6 +69,10 @@ namespace BookWebAPI.Migrations
                     b.Property<DateTime?>("DeletedOn")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("GenreId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -96,24 +100,11 @@ namespace BookWebAPI.Migrations
 
                     b.HasIndex("AuthorId");
 
+                    b.HasIndex("GenreId");
+
                     b.HasIndex("PublisherId");
 
                     b.ToTable("Books");
-                });
-
-            modelBuilder.Entity("BookWebAPI.Models.BooksGenres", b =>
-                {
-                    b.Property<string>("GenreId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("BookId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("GenreId", "BookId");
-
-                    b.HasIndex("BookId");
-
-                    b.ToTable("BooksGenres");
                 });
 
             modelBuilder.Entity("BookWebAPI.Models.Genre", b =>
@@ -178,44 +169,28 @@ namespace BookWebAPI.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("BookWebAPI.Models.Genre", "Genre")
+                        .WithMany("Books")
+                        .HasForeignKey("GenreId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("BookWebAPI.Models.Publisher", "Publisher")
                         .WithMany("Books")
                         .HasForeignKey("PublisherId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Author");
 
-                    b.Navigation("Publisher");
-                });
-
-            modelBuilder.Entity("BookWebAPI.Models.BooksGenres", b =>
-                {
-                    b.HasOne("BookWebAPI.Models.Book", "Book")
-                        .WithMany("Genres")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BookWebAPI.Models.Genre", "Genre")
-                        .WithMany("Books")
-                        .HasForeignKey("GenreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-
                     b.Navigation("Genre");
+
+                    b.Navigation("Publisher");
                 });
 
             modelBuilder.Entity("BookWebAPI.Models.Author", b =>
                 {
                     b.Navigation("Books");
-                });
-
-            modelBuilder.Entity("BookWebAPI.Models.Book", b =>
-                {
-                    b.Navigation("Genres");
                 });
 
             modelBuilder.Entity("BookWebAPI.Models.Genre", b =>

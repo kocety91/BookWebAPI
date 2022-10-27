@@ -1,5 +1,6 @@
 using BookWebAPI.Data;
 using BookWebAPI.Seeding;
+using BookWebAPI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,13 @@ builder.Services.AddSwaggerGen();
 
 var configuration = builder.Configuration;
 builder.Services.AddDbContext<BookDbContext>(opt => opt.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddTransient<IBookService, BookService>();
+builder.Services.AddTransient<IPublisherService, PublisherService>();
+builder.Services.AddTransient<IGenreService, GenreService>();
+builder.Services.AddTransient<IAuthorService, AuthorService>();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 
 
 var app = builder.Build();

@@ -4,7 +4,6 @@
     {
         public Book()
         {
-            this.Genres = new HashSet<BooksGenres>();
         }
 
         public string Name { get; set; }
@@ -21,8 +20,9 @@
 
         public virtual Publisher Publisher { get; set; }
 
-        public virtual ICollection<BooksGenres> Genres { get; set; }
+        public string GenreId { get; set; }
 
+        public virtual Genre Genre { get; set; }
 
     }
 }
