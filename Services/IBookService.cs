@@ -9,5 +9,9 @@ namespace BookWebAPI.Services
         Task<OutputBookDto> GetByIdAsync(string id);
 
         Task<IEnumerable<OutputBookDto>> GetAllAsync();
+
+        Task<OutputBookDto> UpdateAsync(string id, InputBookDto model);
+
+        Task DeleteAsync(string id);
     }
 }

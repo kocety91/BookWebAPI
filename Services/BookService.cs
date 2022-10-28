@@ -45,7 +45,7 @@ namespace BookWebAPI.Services
                 Price = model.Price
             };
 
-            await SetBookProperties(model, book, authorService, publisherService, genreService);
+            await SetBookPropertiesAsync(model, book, authorService, publisherService, genreService);
 
             await db.Books.AddAsync(book);
             await db.SaveChangesAsync();
@@ -65,7 +65,7 @@ namespace BookWebAPI.Services
 
             var book = await bookBefore.FirstOrDefaultAsync();
 
-            if(book == null)
+            if (book == null)
             {
                 throw new NullReferenceException($"No book with this id : {id}");
             }
@@ -76,18 +76,61 @@ namespace BookWebAPI.Services
 
         public async Task<IEnumerable<OutputBookDto>> GetAllAsync()
         {
-            var books =  db.Books.Include(x => x.Author).AsQueryable();
+            var books = db.Books.Include(x => x.Author).AsQueryable();
             books = books.Include(x => x.Genre);
             books = books.Include(x => x.Publisher);
 
             var booksAfter = await books.ToListAsync();
-               
+
             var mappedBooks = mapper.Map<IEnumerable<OutputBookDto>>(booksAfter);
             return mappedBooks;
         }
 
+        public async Task<OutputBookDto> UpdateAsync(string id, InputBookDto model)
+        {
+            if (model == null)
+            {
+                throw new NullReferenceException(nameof(model));
+            }
 
-        private static async Task SetBookProperties(InputBookDto model,
+            var bookForUpdate = await db.Books.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (bookForUpdate == null)
+            {
+                throw new ArgumentException($"No book with this id : {id}");
+            }
+
+            await SetBookPropertiesAsync(model, bookForUpdate, authorService, publisherService, genreService);
+
+            bookForUpdate.Name = model.Name;
+            bookForUpdate.Price = model.Price;
+            bookForUpdate.Author.FirstName = model.AuthorFirstName;
+            bookForUpdate.Author.LastName = model.AuthorLastName;
+            bookForUpdate.Publisher.Name = model.PublisherName;
+            bookForUpdate.Genre.Name = model.Genre;
+
+
+            db.Books.Update(bookForUpdate);
+            await db.SaveChangesAsync();
+
+            var mappedBook = mapper.Map<OutputBookDto>(bookForUpdate);
+            return mappedBook;
+        }
+
+        public async Task DeleteAsync(string id)
+        {
+            var bookForDelete = await db.Books.FirstOrDefaultAsync(x => x.Id == id);
+            if (bookForDelete == null)
+            {
+                throw new NullReferenceException($"Book not found !");
+            }
+
+            db.Books.Remove(bookForDelete);
+            await db.SaveChangesAsync();
+        }
+
+
+        private static async Task SetBookPropertiesAsync(InputBookDto model,
             Book book, IAuthorService authorService, IPublisherService publiherService,
             IGenreService genreService)
         {
