@@ -1,10 +1,11 @@
 ﻿using BookWebAPI.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 namespace BookWebAPI.Data
 {
-    public class BookDbContext : DbContext
+    public class BookDbContext : IdentityDbContext<ApplicationUser,ApplicationRole,string>
     {
         public BookDbContext(DbContextOptions<BookDbContext> options)
             : base(options)
@@ -20,6 +21,9 @@ namespace BookWebAPI.Data
 
         public virtual DbSet<Publisher> Publishers { get; set; }
 
+        public virtual DbSet<ApplicationRole> ApplicationRoles { get; set; }
+
+        public virtual DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

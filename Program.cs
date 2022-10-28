@@ -1,6 +1,7 @@
 using BookWebAPI.Data;
 using BookWebAPI.Extensions;
 using BookWebAPI.Filters;
+using BookWebAPI.Models;
 using BookWebAPI.Seeding;
 using BookWebAPI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,20 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var configuration = builder.Configuration;
-builder.Services.AddDbContext<BookDbContext>(opt => opt.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<BookDbContext>
+    (opt => opt.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+
+builder.Services.AddDefaultIdentity<ApplicationUser>(opt =>
+{
+    opt.Password.RequireDigit = false;
+    opt.Password.RequireLowercase = false;
+    opt.Password.RequireUppercase = false;
+    opt.Password.RequiredLength = 3;
+    opt.Password.RequireNonAlphanumeric = false;
+})
+    .AddRoles<ApplicationRole>()
+    .AddEntityFrameworkStores<BookDbContext>();
 
 builder.Services.AddTransient<IBookService, BookService>();
 builder.Services.AddTransient<IPublisherService, PublisherService>();

@@ -23,8 +23,6 @@ namespace BookWebAPI.Configurations
             builder.HasOne(b => b.Publisher).WithMany(p => p.Books)
                 .HasForeignKey(b => b.PublisherId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-                
         }
     }
 }

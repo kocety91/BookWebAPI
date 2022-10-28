@@ -24,5 +24,9 @@
 
         public virtual Genre Genre { get; set; }
 
+        public string ApplicationUserId { get; set; }
+
+        public virtual ApplicationUser ApplicationUser { get; set; }
+
     }
 }
