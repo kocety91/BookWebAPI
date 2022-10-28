@@ -17,7 +17,8 @@ namespace BookWebAPI.Services
         {
             var addedGenre = new Genre()
             {
-                Name = genre
+                Name = genre,
+                CreatedOn = DateTime.Now
             };
 
             await db.Genres.AddAsync(addedGenre);

@@ -1,4 +1,5 @@
 using BookWebAPI.Data;
+using BookWebAPI.Filters;
 using BookWebAPI.Seeding;
 using BookWebAPI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,7 @@ builder.Services.AddTransient<IPublisherService, PublisherService>();
 builder.Services.AddTransient<IGenreService, GenreService>();
 builder.Services.AddTransient<IAuthorService, AuthorService>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddControllers(opt => opt.Filters.Add(new BookActionFilter()));
 
 
 

@@ -19,11 +19,6 @@ namespace BookWebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> Create([FromBody] InputBookDto model)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-
             var response = await service.CreateAsync(model);
             return Ok(response);
         }
@@ -41,18 +36,10 @@ namespace BookWebAPI.Controllers
         [HttpGet, Route("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> GetById([FromRoute]string id)
+        public async Task<ActionResult> GetById([FromRoute] string id)
         {
-            try
-            {
-                var response = await service.GetByIdAsync(id);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-
-                return NotFound(ex.Message);
-            }
+            var response = await service.GetByIdAsync(id);
+            return Ok(response);
         }
 
         [HttpPut, Route("{id}")]
@@ -60,16 +47,8 @@ namespace BookWebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Update([FromRoute] string id, [FromBody] InputBookDto model)
         {
-            try
-            {
-                var response = await service.UpdateAsync(id, model);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-
-                return NotFound(ex.Message);
-            }
+            await service.UpdateAsync(id, model);
+            return NoContent();
         }
 
         [HttpDelete, Route("{id}")]
@@ -77,16 +56,8 @@ namespace BookWebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Delete([FromRoute] string id)
         {
-            try
-            {
-                await service.DeleteAsync(id);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-
-                return NotFound(ex.Message);
-            }
+            await service.DeleteAsync(id);
+            return NoContent();
         }
     }
 }

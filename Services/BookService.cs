@@ -42,7 +42,8 @@ namespace BookWebAPI.Services
             var book = new Book()
             {
                 Name = model.Name,
-                Price = model.Price
+                Price = model.Price,
+                CreatedOn = DateTime.Now
             };
 
             await SetBookPropertiesAsync(model, book, authorService, publisherService, genreService);
@@ -108,7 +109,7 @@ namespace BookWebAPI.Services
             bookForUpdate.Author.LastName = model.AuthorLastName;
             bookForUpdate.Publisher.Name = model.PublisherName;
             bookForUpdate.Genre.Name = model.Genre;
-
+            bookForUpdate.ModifiedOn = DateTime.Now;
 
             db.Books.Update(bookForUpdate);
             await db.SaveChangesAsync();
