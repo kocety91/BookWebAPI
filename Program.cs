@@ -1,4 +1,5 @@
 using BookWebAPI.Data;
+using BookWebAPI.Extensions;
 using BookWebAPI.Filters;
 using BookWebAPI.Seeding;
 using BookWebAPI.Services;
@@ -22,6 +23,7 @@ builder.Services.AddTransient<IGenreService, GenreService>();
 builder.Services.AddTransient<IAuthorService, AuthorService>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddControllers(opt => opt.Filters.Add(new BookActionFilter()));
+builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
 
 
@@ -47,6 +49,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapControllers();
 
