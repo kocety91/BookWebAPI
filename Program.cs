@@ -4,7 +4,10 @@ using BookWebAPI.Filters;
 using BookWebAPI.Models;
 using BookWebAPI.Seeding;
 using BookWebAPI.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +34,31 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(opt =>
     .AddRoles<ApplicationRole>()
     .AddEntityFrameworkStores<BookDbContext>();
 
+
+var key = Encoding.UTF8.GetBytes(configuration["Jtw:key"]);
+var tokenValidationParamaters = new TokenValidationParameters()
+{
+    ValidateActor = true,
+    ValidateIssuer = false,
+    ValidateAudience = false,
+    ValidateIssuerSigningKey =true,
+    ClockSkew = TimeSpan.Zero,
+    IssuerSigningKey = new SymmetricSecurityKey(key)
+};
+
+builder.Services.AddAuthentication(opt =>
+{
+    opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(opt =>
+  {
+      opt.SaveToken = true;
+      opt.RequireHttpsMetadata = false;
+      opt.TokenValidationParameters = tokenValidationParamaters;
+  });
+
+
 builder.Services.AddTransient<IBookService, BookService>();
 builder.Services.AddTransient<IPublisherService, PublisherService>();
 builder.Services.AddTransient<IGenreService, GenreService>();
@@ -39,6 +67,7 @@ builder.Services.AddTransient<IIdentityService, IdentityService>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddControllers(opt => opt.Filters.Add(new BookActionFilter()));
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
+builder.Services.AddSingleton(tokenValidationParamaters);
 
 
 
