@@ -16,7 +16,8 @@ namespace BookWebAPI.Controllers
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> Register(RegisterRequestModel model)
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<ActionResult> Register([FromBody]RegisterRequestModel model)
         {
             var response = await service.RegisterAsync(model);
             return Ok(response);
@@ -24,7 +25,8 @@ namespace BookWebAPI.Controllers
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> Login(LoginRequestModel model)
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult> Login([FromBody]LoginRequestModel model)
         {
             var response = await service.LoginAsync(model);
             return Ok(response);

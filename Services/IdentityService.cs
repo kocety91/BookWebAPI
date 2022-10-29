@@ -3,7 +3,7 @@ using BookWebAPI.Data;
 using BookWebAPI.Dtos.Identity;
 using BookWebAPI.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using static BookWebAPI.Common.CustomExceptions;
 
 namespace BookWebAPI.Services
 {
@@ -28,10 +28,10 @@ namespace BookWebAPI.Services
         public async Task<AuthenticationResponseModel> LoginAsync(LoginRequestModel model)
         {
             var user = await userManager.FindByEmailAsync(model.Email);
-            if (user == null) throw new ArgumentException($"No user with this email: {model.Email}");
+            if (user == null) throw new UnauthorizeException($"No user with this email: {model.Email}");
 
             var password = await userManager.CheckPasswordAsync(user, model.Password);
-            if (!password) throw new ArgumentException($"Wrong password !!! ");
+            if (!password) throw new UnauthorizeException($"Wrong password !!! ");
 
             if (model == null) throw new NullReferenceException(nameof(model));
 
@@ -42,7 +42,7 @@ namespace BookWebAPI.Services
         public async Task<AuthenticationResponseModel> RegisterAsync(RegisterRequestModel model)
         {
             var user = await userManager.FindByEmailAsync(model.Email);
-            if (user != null) throw new ArgumentException($"User with this email: {model.Email} already exists.");
+            if (user != null) throw new ExistsException($"User with this email: {model.Email} already exists.");
 
             if (model == null) throw new NullReferenceException(nameof(model));
 
@@ -60,9 +60,6 @@ namespace BookWebAPI.Services
                 ApplicationRole = applicationUserRole,
                 Country = model.Country,
             };
-
-            //applicationUserRole.ApplicationUser = applicationUser;
-            //applicationUserRole.ApplicationUserId = applicationUser.Id;
 
             var result = await userManager.CreateAsync(applicationUser, model.Password);
 

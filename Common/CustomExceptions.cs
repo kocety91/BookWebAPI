@@ -22,5 +22,21 @@
             {
             }
         }
+
+        public class UnauthorizeException : CustomExceptions
+        {
+            public UnauthorizeException(string message) 
+                : base(message)
+            {
+            }
+        }
+
+        public class ExistsException : CustomExceptions
+        {
+            public ExistsException(string message)
+                : base(message)
+            {
+            }
+        }
     }
 }

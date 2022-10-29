@@ -23,7 +23,9 @@ namespace BookWebAPI.Extensions
             {
                 BadRequestException => StatusCodes.Status400BadRequest,
                 NotFoundException => StatusCodes.Status404NotFound,
-                _=> StatusCodes.Status500InternalServerError
+                UnauthorizeException => StatusCodes.Status401Unauthorized,
+                ExistsException => StatusCodes.Status409Conflict,
+                _ => StatusCodes.Status500InternalServerError
             };
 
             var errorDetails = new ErrorDetails()
