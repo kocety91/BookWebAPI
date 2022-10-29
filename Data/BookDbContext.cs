@@ -12,7 +12,6 @@ namespace BookWebAPI.Data
         {
         }
 
-
         public virtual DbSet<Author> Authors { get; set; }
 
         public virtual DbSet<Book> Books { get; set; }
@@ -20,11 +19,6 @@ namespace BookWebAPI.Data
         public virtual DbSet<Genre> Genres { get; set; }
 
         public virtual DbSet<Publisher> Publishers { get; set; }
-
-        public virtual DbSet<ApplicationRole> ApplicationRoles { get; set; }
-
-        public virtual DbSet<ApplicationUser> ApplicationUsers { get; set; }
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

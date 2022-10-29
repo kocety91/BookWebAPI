@@ -8,9 +8,16 @@ namespace BookWebAPI.Models
         {
             this.Id = Guid.NewGuid().ToString();
         }
+        public DateTime CreatedOn { get; set; }
 
-        public string ApplicationUserId { get; set; }
+        public DateTime? ModifiedOn { get; set; }
+            
+        public string? ApplicationUserId { get; set; }
 
         public virtual ApplicationUser ApplicationUser { get; set; }
+
+        public bool IsDeleted { get; set; }
+
+        public DateTime? DeletedOn { get; set; }
     }
 }
