@@ -31,5 +31,14 @@ namespace BookWebAPI.Controllers
             var response = await service.LoginAsync(model);
             return Ok(response);
         }
+
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> RefreshToken([FromBody]TokenRequestModel model)
+        {
+            var response = await service.VerifyTokenAsync(model);
+            return Ok(response);
+        }
     }
 }

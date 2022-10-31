@@ -10,8 +10,8 @@ namespace BookWebAPI.Configurations
         {
             builder.Property(x => x.Country).IsRequired();
 
-            builder.HasOne(x => x.RefreshToken)
-                .WithOne(t => t.ApplicationUser).HasForeignKey<RefreshToken>(x => x.ApplicationUserId)
+            builder.HasMany(x => x.RefreshTokens)
+                .WithOne(t => t.ApplicationUser).HasForeignKey(t => t.ApplicationUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
 

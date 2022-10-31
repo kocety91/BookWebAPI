@@ -6,5 +6,8 @@ namespace BookWebAPI.Dtos.Identity
     {
         [Required]
         public string Token { get; set; }
+
+        [Required]
+        public string RefreshToken { get; set; }
     }
 }

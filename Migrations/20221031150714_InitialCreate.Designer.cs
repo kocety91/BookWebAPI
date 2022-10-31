@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookWebAPI.Migrations
 {
     [DbContext(typeof(BookDbContext))]
-    [Migration("20221031134135_InitialCreate")]
+    [Migration("20221031150714_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -110,10 +110,6 @@ namespace BookWebAPI.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<string>("RefreshTokenId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -314,8 +310,7 @@ namespace BookWebAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId")
-                        .IsUnique();
+                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("RefreshTokens");
                 });
@@ -468,8 +463,8 @@ namespace BookWebAPI.Migrations
             modelBuilder.Entity("BookWebAPI.Models.RefreshToken", b =>
                 {
                     b.HasOne("BookWebAPI.Models.ApplicationUser", "ApplicationUser")
-                        .WithOne("RefreshToken")
-                        .HasForeignKey("BookWebAPI.Models.RefreshToken", "ApplicationUserId")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -535,8 +530,7 @@ namespace BookWebAPI.Migrations
 
                     b.Navigation("Logins");
 
-                    b.Navigation("RefreshToken")
-                        .IsRequired();
+                    b.Navigation("RefreshTokens");
 
                     b.Navigation("Roles");
                 });

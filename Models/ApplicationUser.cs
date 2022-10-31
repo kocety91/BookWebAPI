@@ -8,17 +8,16 @@ namespace BookWebAPI.Models
         {
             this.Id = Guid.NewGuid().ToString();
             this.Books = new HashSet<Book>();
+            this.RefreshTokens = new HashSet<RefreshToken>();
             this.Claims = new HashSet<IdentityUserClaim<string>>();
             this.Roles = new HashSet<IdentityUserRole<string>>();
             this.Logins = new HashSet<IdentityUserLogin<string>>();
         }
         public string Country { get; set; }
 
-        public string RefreshTokenId { get; set; }
-
-        public virtual RefreshToken RefreshToken { get; set; }
-
         public virtual ICollection<Book> Books { get; set; }
+
+        public virtual ICollection<RefreshToken> RefreshTokens { get; set; }
 
         public virtual ICollection<IdentityUserClaim<string>> Claims { get; set; }
 
