@@ -1,4 +1,6 @@
 ﻿using BookWebAPI.Data;
+using BookWebAPI.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace BookWebAPI.Seeding
 {
@@ -27,11 +29,6 @@ namespace BookWebAPI.Seeding
                 await seeder.SeedAsync(dbContext, serviceProvider);
                 await dbContext.SaveChangesAsync();
             }
-
-
         }
-
-
-
     }
 }

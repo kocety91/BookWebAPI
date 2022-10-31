@@ -27,9 +27,6 @@ namespace BookWebAPI.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -73,10 +70,6 @@ namespace BookWebAPI.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
-
-                    b.Property<string>("ApplicationRoleId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -127,9 +120,6 @@ namespace BookWebAPI.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApplicationRoleId")
-                        .IsUnique();
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -379,7 +369,12 @@ namespace BookWebAPI.Migrations
                     b.Property<string>("RoleId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("RoleId");
 
@@ -405,17 +400,6 @@ namespace BookWebAPI.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("BookWebAPI.Models.ApplicationUser", b =>
-                {
-                    b.HasOne("BookWebAPI.Models.ApplicationRole", "ApplicationRole")
-                        .WithOne("ApplicationUser")
-                        .HasForeignKey("BookWebAPI.Models.ApplicationUser", "ApplicationRoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ApplicationRole");
                 });
 
             modelBuilder.Entity("BookWebAPI.Models.Book", b =>
@@ -490,6 +474,10 @@ namespace BookWebAPI.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
+                    b.HasOne("BookWebAPI.Models.ApplicationUser", null)
+                        .WithMany("Roles")
+                        .HasForeignKey("ApplicationUserId");
+
                     b.HasOne("BookWebAPI.Models.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
@@ -499,7 +487,7 @@ namespace BookWebAPI.Migrations
                     b.HasOne("BookWebAPI.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -512,12 +500,6 @@ namespace BookWebAPI.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("BookWebAPI.Models.ApplicationRole", b =>
-                {
-                    b.Navigation("ApplicationUser")
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("BookWebAPI.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Books");
@@ -525,6 +507,8 @@ namespace BookWebAPI.Migrations
                     b.Navigation("Claims");
 
                     b.Navigation("Logins");
+
+                    b.Navigation("Roles");
                 });
 
             modelBuilder.Entity("BookWebAPI.Models.Author", b =>

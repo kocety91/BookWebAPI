@@ -7,5 +7,7 @@ namespace BookWebAPI.Services
         Task<AuthenticationResponseModel> RegisterAsync(RegisterRequestModel model);
 
         Task<AuthenticationResponseModel> LoginAsync(LoginRequestModel model);
+
+        //Task<AuthenticationResponseModel> VerifyToken(TokenRequestModel model);
     }
 }

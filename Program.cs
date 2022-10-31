@@ -35,7 +35,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(opt =>
     .AddEntityFrameworkStores<BookDbContext>();
 
 
-var key = Encoding.UTF8.GetBytes(configuration["Jtw:key"]);
+var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]);
 var tokenValidationParamaters = new TokenValidationParameters()
 {
     ValidateActor = true,

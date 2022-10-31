@@ -12,10 +12,6 @@ namespace BookWebAPI.Models
 
         public DateTime? ModifiedOn { get; set; }
             
-        public string? ApplicationUserId { get; set; }
-
-        public virtual ApplicationUser ApplicationUser { get; set; }
-
         public bool IsDeleted { get; set; }
 
         public DateTime? DeletedOn { get; set; }
