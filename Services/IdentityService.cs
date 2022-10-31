@@ -3,7 +3,6 @@ using BookWebAPI.Data;
 using BookWebAPI.Dtos.Identity;
 using BookWebAPI.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -65,15 +64,22 @@ namespace BookWebAPI.Services
                 Country = model.Country
             };
 
+
             var result = await userManager.CreateAsync(applicationUser, model.Password);
             if (!result.Succeeded) throw new ArgumentException($"Failed to create user");
 
 
-            var userRole = new ApplicationRole() { Name = "user", CreatedOn = DateTime.Now };
-            var roleResult = await roleManager.CreateAsync(userRole);
-            if (!roleResult.Succeeded) throw new ArgumentException($"{nameof(roleResult)}");
-            await userManager.AddToRoleAsync(applicationUser, userRole.Name);
-            await db.SaveChangesAsync();
+            var roleExist = await roleManager.RoleExistsAsync("user");
+
+            if (!roleExist)
+            {
+                var roleResult = await roleManager
+                    .CreateAsync(new ApplicationRole() { Name = "user", CreatedOn = DateTime.Now });
+                if (!roleResult.Succeeded) throw new ArgumentException($"{nameof(roleResult)}");
+            }
+
+            var roleToUserResult = await userManager.AddToRoleAsync(applicationUser, "user");
+            if (!roleToUserResult.Succeeded) throw new ArgumentException($"{nameof(roleToUserResult)}");
 
             await this.GenerateJwtToken(applicationUser);
             var mappedUser = mapper.Map<AuthenticationResponseModel>(applicationUser);
@@ -131,11 +137,9 @@ namespace BookWebAPI.Services
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256),
             };
 
-            //--tuka si !!!
-
             foreach (var role in roles)
             {
-                tokenDescriptor.Claims.Add(ClaimTypes.Role, role);
+                tokenDescriptor.Subject.AddClaim(new Claim(ClaimTypes.Role, role));
             }
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
