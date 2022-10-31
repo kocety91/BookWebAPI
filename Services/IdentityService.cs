@@ -90,7 +90,7 @@ namespace BookWebAPI.Services
         //    var tokenInVerification = jwtHandler
         //        .ValidateToken(model.Token, tokenValidationParameters, out var validatedToken);
 
-        //    if(validatedToken is JwtSecurityToken jwtSecureToken)
+        //    if (validatedToken is JwtSecurityToken jwtSecureToken)
         //    {
         //        var result = jwtSecureToken.Header.Alg
         //            .Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
@@ -156,7 +156,5 @@ namespace BookWebAPI.Services
 
             return dateTImeVal;
         }
-
-
     }
 }

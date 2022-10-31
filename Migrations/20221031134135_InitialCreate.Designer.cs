@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookWebAPI.Migrations
 {
     [DbContext(typeof(BookDbContext))]
-    [Migration("20221031115903_Test")]
-    partial class Test
+    [Migration("20221031134135_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -110,6 +110,10 @@ namespace BookWebAPI.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("RefreshTokenId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -279,6 +283,43 @@ namespace BookWebAPI.Migrations
                     b.ToTable("Publishers");
                 });
 
+            modelBuilder.Entity("BookWebAPI.Models.RefreshToken", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("AddedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("JwtId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId")
+                        .IsUnique();
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
@@ -424,6 +465,17 @@ namespace BookWebAPI.Migrations
                     b.Navigation("Publisher");
                 });
 
+            modelBuilder.Entity("BookWebAPI.Models.RefreshToken", b =>
+                {
+                    b.HasOne("BookWebAPI.Models.ApplicationUser", "ApplicationUser")
+                        .WithOne("RefreshToken")
+                        .HasForeignKey("BookWebAPI.Models.RefreshToken", "ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("BookWebAPI.Models.ApplicationRole", null)
@@ -482,6 +534,9 @@ namespace BookWebAPI.Migrations
                     b.Navigation("Claims");
 
                     b.Navigation("Logins");
+
+                    b.Navigation("RefreshToken")
+                        .IsRequired();
 
                     b.Navigation("Roles");
                 });

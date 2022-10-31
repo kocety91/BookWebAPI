@@ -14,6 +14,10 @@ namespace BookWebAPI.Models
         }
         public string Country { get; set; }
 
+        public string RefreshTokenId { get; set; }
+
+        public virtual RefreshToken RefreshToken { get; set; }
+
         public virtual ICollection<Book> Books { get; set; }
 
         public virtual ICollection<IdentityUserClaim<string>> Claims { get; set; }
