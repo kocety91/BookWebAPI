@@ -13,21 +13,18 @@ namespace BookWebAPI.Services
 {
     public class IdentityService : IIdentityService
     {
-        private readonly BookDbContext db;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IMapper mapper;
         private readonly RoleManager<ApplicationRole> roleManager;
         private readonly TokenValidationParameters tokenValidationParameters;
         private readonly IConfiguration configuration;
 
-        public IdentityService(BookDbContext db,
-            UserManager<ApplicationUser> userManager,
+        public IdentityService(UserManager<ApplicationUser> userManager,
             IMapper mapper,
             RoleManager<ApplicationRole> roleManager,
             TokenValidationParameters tokenValidationParameters,
             IConfiguration configuration)
         {
-            this.db = db;
             this.userManager = userManager;
             this.mapper = mapper;
             this.roleManager = roleManager;
@@ -45,8 +42,7 @@ namespace BookWebAPI.Services
 
             if (model == null) throw new NullReferenceException(nameof(model));
 
-            await this.GenerateJwtToken(user);
-            var mappedUser = mapper.Map<AuthenticationResponseModel>(user);
+            var mappedUser = await this.GenerateJwtToken(user);
             return mappedUser;
         }
 
@@ -81,8 +77,7 @@ namespace BookWebAPI.Services
             var roleToUserResult = await userManager.AddToRoleAsync(applicationUser, "user");
             if (!roleToUserResult.Succeeded) throw new ArgumentException($"{nameof(roleToUserResult)}");
 
-            await this.GenerateJwtToken(applicationUser);
-            var mappedUser = mapper.Map<AuthenticationResponseModel>(applicationUser);
+            var mappedUser = await this.GenerateJwtToken(applicationUser);
             return mappedUser;
         }
 
@@ -152,9 +147,7 @@ namespace BookWebAPI.Services
                 Email = user.Email,
                 Token = jwtToken
             };
-
         }
-
 
         private DateTime UnixTimeStampToDateTIme(long unixTimeSpan)
         {
