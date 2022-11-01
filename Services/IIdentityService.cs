@@ -8,6 +8,8 @@ namespace BookWebAPI.Services
 
         Task<AuthenticationResponseModel> LoginAsync(LoginRequestModel model);
 
+        Task LogoutAsync(string userId);
+
         Task<AuthenticationResponseModel> VerifyTokenAsync(TokenRequestModel model);
     }
 }

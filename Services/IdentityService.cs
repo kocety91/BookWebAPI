@@ -28,7 +28,6 @@ namespace BookWebAPI.Services
         {
             this.db = db;
             this.userManager = userManager;
-            this.mapper = mapper;
             this.roleManager = roleManager;
             this.tokenValidationParameters = tokenValidationParameters;
             this.configuration = configuration;
@@ -81,6 +80,19 @@ namespace BookWebAPI.Services
 
             var mappedUser = await this.GenerateJwtTokenAsync(applicationUser);
             return mappedUser;
+        }
+
+        public async Task LogoutAsync(string userId)
+        {
+            var logoutUser = await userManager.FindByIdAsync(userId);
+            if(logoutUser == null) throw new UnauthorizeException($"Can't logout user with id{userId}");
+
+            var refreshTokensForUser = await db.RefreshTokens
+                .Where(x => x.ApplicationUserId == userId).ToListAsync();
+
+            db.RefreshTokens.RemoveRange(refreshTokensForUser);
+
+            await db.SaveChangesAsync();
         }
 
         public async Task<AuthenticationResponseModel> VerifyTokenAsync(TokenRequestModel model)
@@ -195,5 +207,7 @@ namespace BookWebAPI.Services
             var chars = "DSADSADJHSADJKHSADKQYSADSA3913123dasda";
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
+
+      
     }
 }
