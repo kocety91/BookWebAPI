@@ -56,6 +56,25 @@ builder.Services.AddAuthentication(opt =>
       opt.SaveToken = true;
       opt.RequireHttpsMetadata = false;
       opt.TokenValidationParameters = tokenValidationParamaters;
+      opt.Events = new JwtBearerEvents
+      {
+          OnChallenge = async context =>
+          {
+              context.HandleResponse();
+
+              context.Response.StatusCode = 401;
+              context.Response.Headers.Append("Unauthorized", "User");
+              context.Response.ContentType = "application/json";
+
+              var errorResponse = new ErrorDetails
+              {
+                  Message = "You are not authorized !",
+                  Error = context.Response.StatusCode,
+              };
+
+              await context.Response.WriteAsync(errorResponse.ToString());
+          },
+      };
   });
 
 
@@ -72,6 +91,8 @@ builder.Services.AddSingleton(tokenValidationParamaters);
 
 
 var app = builder.Build();
+
+//app.UseHttpLogging();
 
 //seed data
 using(var serviceScope = app.Services.CreateScope())

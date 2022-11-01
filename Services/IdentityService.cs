@@ -85,7 +85,8 @@ namespace BookWebAPI.Services
         public async Task LogoutAsync(string userId)
         {
             var logoutUser = await userManager.FindByIdAsync(userId);
-            if(logoutUser == null) throw new UnauthorizeException($"Can't logout user with id{userId}");
+
+            if (logoutUser == null) throw new UnauthorizeException();
 
             var refreshTokensForUser = await db.RefreshTokens
                 .Where(x => x.ApplicationUserId == userId).ToListAsync();
@@ -97,7 +98,7 @@ namespace BookWebAPI.Services
 
         public async Task<AuthenticationResponseModel> VerifyTokenAsync(TokenRequestModel model)
         {
-            var jwtHandler = new JwtSecurityTokenHandler(); 
+            var jwtHandler = new JwtSecurityTokenHandler();
 
             this.tokenValidationParameters.ValidateLifetime = false; //za debug
 
@@ -129,7 +130,7 @@ namespace BookWebAPI.Services
             var jti = tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
             if (storedToken.JwtId != jti) throw new ArgumentException("Jti's doesnt match!");
 
-            if(storedToken.ExpiryDate < DateTime.Now) throw new ArgumentException("Refresh token is expired!");
+            if (storedToken.ExpiryDate < DateTime.Now) throw new ArgumentException("Refresh token is expired!");
 
             storedToken.IsUsed = true;
             db.RefreshTokens.Update(storedToken);
@@ -143,7 +144,7 @@ namespace BookWebAPI.Services
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]);
-            
+
             var roles = await userManager.GetRolesAsync(user);
 
             var tokenDescriptor = new SecurityTokenDescriptor()
@@ -208,6 +209,6 @@ namespace BookWebAPI.Services
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-      
+
     }
 }

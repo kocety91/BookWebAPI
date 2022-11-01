@@ -4,6 +4,13 @@ namespace BookWebAPI.Extensions
 {
     public class ExceptionHandlingMiddleware : IMiddleware
     {
+        private readonly ILogger<ExceptionHandlingMiddleware> logger;
+
+        public ExceptionHandlingMiddleware(ILogger<ExceptionHandlingMiddleware> logger)
+        {
+            this.logger = logger;
+        }   
+
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
             try
@@ -13,6 +20,7 @@ namespace BookWebAPI.Extensions
             catch (Exception ex)
             {
                 await HandleExceptionAsync(context, ex);
+                logger.LogError(ex.StackTrace);
             }
         }
 

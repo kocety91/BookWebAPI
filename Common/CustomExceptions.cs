@@ -6,6 +6,9 @@
             : base(message)
         {
         }
+        public CustomExceptions()
+        {
+        }
 
         public class BadRequestException : CustomExceptions
         {
@@ -21,12 +24,17 @@
                 : base(message)
             {
             }
+
         }
 
         public class UnauthorizeException : CustomExceptions
         {
             public UnauthorizeException(string message) 
                 : base(message)
+            {
+            }
+
+            public UnauthorizeException()
             {
             }
         }
