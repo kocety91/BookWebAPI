@@ -2,6 +2,7 @@
 using BookWebAPI.Data;
 using BookWebAPI.Dtos.Books;
 using BookWebAPI.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using static BookWebAPI.Common.CustomExceptions;
 
@@ -14,18 +15,21 @@ namespace BookWebAPI.Services
         private readonly IPublisherService publisherService;
         private readonly IGenreService genreService;
         private readonly IAuthorService authorService;
+        private readonly UserManager<ApplicationUser> userManager;
 
         public BookService(BookDbContext db,
             IMapper mapper,
             IPublisherService publisherService,
             IGenreService genreService,
-            IAuthorService authorService)
+            IAuthorService authorService,
+             UserManager<ApplicationUser> userManager)
         {
             this.db = db;
             this.mapper = mapper;
             this.publisherService = publisherService;
             this.genreService = genreService;
             this.authorService = authorService;
+            this.userManager = userManager;
         }
 
         public async Task<OutputBookDto> CreateAsync(InputBookDto model)
@@ -34,17 +38,22 @@ namespace BookWebAPI.Services
             
             if(model == null) throw new NullReferenceException(nameof(model));
 
+            var user = await userManager.FindByIdAsync(model.UserId);
+
             var book = new Book()
             {
                 Name = model.Name,
                 Price = model.Price,
-                CreatedOn = DateTime.Now
+                CreatedOn = DateTime.Now,
+                ApplicationUser = user,
+                ApplicationUserId = model.UserId
             };
 
             await SetBookPropertiesAsync(model, book, authorService, publisherService, genreService);
 
             await db.Books.AddAsync(book);
             await db.SaveChangesAsync();
+
 
             var mappedBook = mapper.Map<OutputBookDto>(book);
 
@@ -58,6 +67,7 @@ namespace BookWebAPI.Services
             bookBefore = bookBefore.Include(x => x.Author);
             bookBefore = bookBefore.Include(x => x.Genre);
             bookBefore = bookBefore.Include(x => x.Publisher);
+            bookBefore = bookBefore.Include(x => x.ApplicationUser);
 
             var book = await bookBefore.FirstOrDefaultAsync();
 
@@ -72,6 +82,7 @@ namespace BookWebAPI.Services
             var books = db.Books.Include(x => x.Author).AsQueryable();
             books = books.Include(x => x.Genre);
             books = books.Include(x => x.Publisher);
+            books = books.Include(x => x.ApplicationUser);
 
             var booksAfter = await books.ToListAsync();
 
@@ -88,6 +99,8 @@ namespace BookWebAPI.Services
             if (bookForUpdate == null) throw new NotFoundException($"No book with this id : {id}");
             
             await SetBookPropertiesAsync(model, bookForUpdate, authorService, publisherService, genreService);
+            var user = await userManager.FindByIdAsync(model.UserId);
+
 
             bookForUpdate.Name = model.Name;
             bookForUpdate.Price = model.Price;
@@ -96,6 +109,7 @@ namespace BookWebAPI.Services
             bookForUpdate.Publisher.Name = model.PublisherName;
             bookForUpdate.Genre.Name = model.Genre;
             bookForUpdate.ModifiedOn = DateTime.Now;
+            bookForUpdate.ApplicationUserId = user.Id;
 
             db.Books.Update(bookForUpdate);
             await db.SaveChangesAsync();

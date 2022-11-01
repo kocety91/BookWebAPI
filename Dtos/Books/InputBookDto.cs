@@ -26,5 +26,8 @@ namespace BookWebAPI.Dtos.Books
 
         [Required]
         public string Genre { get; set; }
+
+        [Required]
+        public string UserId { get; set; }
     }
 }
