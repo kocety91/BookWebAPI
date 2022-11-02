@@ -10,6 +10,7 @@ var configuration = builder.Configuration;
 builder.Services
     .ConfigureDataBase(configuration)
     .ConfigureJwt(configuration)
+    .ConfigureDataRepositories()
     .ConfigureBusinesServices(configuration)
     .ConfigureFilters(configuration)
     .AddAuthorization()

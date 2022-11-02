@@ -1,6 +1,7 @@
 ﻿using BookWebAPI.Data;
 using BookWebAPI.Filters;
 using BookWebAPI.Models;
+using BookWebAPI.Repositories;
 using BookWebAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -78,6 +79,12 @@ namespace BookWebAPI.Extensions
             return service;
         }
 
+        public static IServiceCollection ConfigureDataRepositories(this IServiceCollection service)
+        {
+            service.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+            return service;
+        }
+        
         public static IServiceCollection ConfigureBusinesServices(this IServiceCollection service,IConfiguration configuration)
         {
             service.AddTransient<IBookService, BookService>();

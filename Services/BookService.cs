@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using BookWebAPI.Data;
 using BookWebAPI.Dtos.Books;
 using BookWebAPI.Models;
+using BookWebAPI.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using static BookWebAPI.Common.CustomExceptions;
@@ -10,21 +10,21 @@ namespace BookWebAPI.Services
 {
     public class BookService : IBookService
     {
-        private readonly BookDbContext db;
+        private readonly IRepository<Book> bookRepository;
         private readonly IMapper mapper;
         private readonly IPublisherService publisherService;
         private readonly IGenreService genreService;
         private readonly IAuthorService authorService;
         private readonly UserManager<ApplicationUser> userManager;
 
-        public BookService(BookDbContext db,
+        public BookService(IRepository<Book> bookRepository,
             IMapper mapper,
             IPublisherService publisherService,
             IGenreService genreService,
             IAuthorService authorService,
              UserManager<ApplicationUser> userManager)
         {
-            this.db = db;
+            this.bookRepository = bookRepository;
             this.mapper = mapper;
             this.publisherService = publisherService;
             this.genreService = genreService;
@@ -34,9 +34,10 @@ namespace BookWebAPI.Services
 
         public async Task<OutputBookDto> CreateAsync(InputBookDto model)
         {
-            if (await db.Books.AnyAsync(x => x.Name == model.Name)) throw new ArgumentException($"Book with {model.Name} already exist!");
-            
-            if(model == null) throw new NullReferenceException(nameof(model));
+            var searchedBook = await bookRepository.All().FirstOrDefaultAsync(x => x.Name == model.Name);
+            if (searchedBook != null) throw new ArgumentException($"Book with {model.Name} already exist!");
+
+            if (model == null) throw new NullReferenceException(nameof(model));
 
             var user = await userManager.FindByIdAsync(model.UserId);
 
@@ -51,8 +52,8 @@ namespace BookWebAPI.Services
 
             await SetBookPropertiesAsync(model, book, authorService, publisherService, genreService);
 
-            await db.Books.AddAsync(book);
-            await db.SaveChangesAsync();
+            await bookRepository.AddAsync(book);
+            await bookRepository.SaveChangesAsync();
 
 
             var mappedBook = mapper.Map<OutputBookDto>(book);
@@ -63,7 +64,7 @@ namespace BookWebAPI.Services
 
         public async Task<OutputBookDto> GetByIdAsync(string id)
         {
-            var bookBefore = db.Books.Where(x => x.Id == id).AsQueryable();
+            var bookBefore = bookRepository.AllAsNoTracking().Where(x => x.Id == id).AsQueryable();
             bookBefore = bookBefore.Include(x => x.Author);
             bookBefore = bookBefore.Include(x => x.Genre);
             bookBefore = bookBefore.Include(x => x.Publisher);
@@ -79,7 +80,7 @@ namespace BookWebAPI.Services
 
         public async Task<IEnumerable<OutputBookDto>> GetAllAsync()
         {
-            var books = db.Books.Include(x => x.Author).AsQueryable();
+            var books = bookRepository.AllAsNoTracking().Include(x => x.Author).AsQueryable();
             books = books.Include(x => x.Genre);
             books = books.Include(x => x.Publisher);
             books = books.Include(x => x.ApplicationUser);
@@ -94,10 +95,10 @@ namespace BookWebAPI.Services
         {
             if (model == null) throw new NullReferenceException(nameof(model));
 
-            var bookForUpdate = await db.Books.FirstOrDefaultAsync(x => x.Id == id);
+            var bookForUpdate = await bookRepository.All().FirstOrDefaultAsync(x => x.Id == id);
 
             if (bookForUpdate == null) throw new NotFoundException($"No book with this id : {id}");
-            
+
             await SetBookPropertiesAsync(model, bookForUpdate, authorService, publisherService, genreService);
             var user = await userManager.FindByIdAsync(model.UserId);
 
@@ -111,8 +112,8 @@ namespace BookWebAPI.Services
             bookForUpdate.ModifiedOn = DateTime.Now;
             bookForUpdate.ApplicationUserId = user.Id;
 
-            db.Books.Update(bookForUpdate);
-            await db.SaveChangesAsync();
+            bookRepository.Update(bookForUpdate);
+            await bookRepository.SaveChangesAsync();
 
             var mappedBook = mapper.Map<OutputBookDto>(bookForUpdate);
             return mappedBook;
@@ -120,12 +121,12 @@ namespace BookWebAPI.Services
 
         public async Task DeleteAsync(string id)
         {
-            var bookForDelete = await db.Books.FirstOrDefaultAsync(x => x.Id == id);
+            var bookForDelete = await bookRepository.All().FirstOrDefaultAsync(x => x.Id == id);
 
             if (bookForDelete == null) throw new NotFoundException($"Book with id : {id} not found !");
 
-            db.Books.Remove(bookForDelete);
-            await db.SaveChangesAsync();
+            bookRepository.Delete(bookForDelete);
+            await bookRepository.SaveChangesAsync();
         }
 
 
