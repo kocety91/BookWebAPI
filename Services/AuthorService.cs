@@ -1,16 +1,16 @@
-﻿using BookWebAPI.Data;
-using BookWebAPI.Models;
+﻿using BookWebAPI.Models;
+using BookWebAPI.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookWebAPI.Services
 {
     public class AuthorService : IAuthorService
     {
-        private readonly BookDbContext db;
+        private readonly IRepository<Author> authorRepository;
 
-        public AuthorService(BookDbContext db)
+        public AuthorService(IRepository<Author> authorRepository)
         {
-            this.db = db;
+            this.authorRepository = authorRepository;
         }
 
         public async Task<Author> CreateAsync(string authorFirstName, string authorLastName)
@@ -22,15 +22,15 @@ namespace BookWebAPI.Services
                 CreatedOn = DateTime.Now
             };
 
-            await db.Authors.AddAsync(addedAuthor);
-            await db.SaveChangesAsync();
+            await authorRepository.AddAsync(addedAuthor);
+            await authorRepository.SaveChangesAsync();
 
             return addedAuthor;
         }
 
         public async Task<Author> GetByNameAsync(string authorFirstName, string authorLastName)
         {
-            var searchedAuthor = await db.Authors
+            var searchedAuthor = await authorRepository.AllAsNoTracking()
                 .FirstOrDefaultAsync(x => x.FirstName == authorFirstName && x.LastName == authorLastName);
 
             if (searchedAuthor == null)

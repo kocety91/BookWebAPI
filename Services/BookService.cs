@@ -32,7 +32,7 @@ namespace BookWebAPI.Services
             this.userManager = userManager;
         }
 
-        public async Task<OutputBookDto> CreateAsync(InputBookDto model)
+        public async Task<string> CreateAsync(InputBookDto model)
         {
             var searchedBook = await bookRepository.All().FirstOrDefaultAsync(x => x.Name == model.Name);
             if (searchedBook != null) throw new ArgumentException($"Book with {model.Name} already exist!");
@@ -40,6 +40,9 @@ namespace BookWebAPI.Services
             if (model == null) throw new NullReferenceException(nameof(model));
 
             var user = await userManager.FindByIdAsync(model.UserId);
+            var author = await authorService.GetByNameAsync(model.AuthorFirstName, model.AuthorLastName);
+            var publisher = await publisherService.GetByNameAsync(model.PublisherName);
+            var genre = await genreService.GetByNameAsync(model.Genre);
 
             var book = new Book()
             {
@@ -47,30 +50,29 @@ namespace BookWebAPI.Services
                 Price = model.Price,
                 CreatedOn = DateTime.Now,
                 ApplicationUser = user,
-                ApplicationUserId = model.UserId
+                ApplicationUserId = model.UserId,
+                AuthorId = author.Id,
+                PublisherId = publisher.Id,
+                GenreId = genre.Id
             };
-
-            await SetBookPropertiesAsync(model, book, authorService, publisherService, genreService);
 
             await bookRepository.AddAsync(book);
             await bookRepository.SaveChangesAsync();
 
-
-            var mappedBook = mapper.Map<OutputBookDto>(book);
-
-            return mappedBook;
-
+            return book.Id;
+           //return mapper.Map<OutputBookDto>(book);
         }
 
         public async Task<OutputBookDto> GetByIdAsync(string id)
         {
-            var bookBefore = bookRepository.AllAsNoTracking().Where(x => x.Id == id).AsQueryable();
-            bookBefore = bookBefore.Include(x => x.Author);
-            bookBefore = bookBefore.Include(x => x.Genre);
-            bookBefore = bookBefore.Include(x => x.Publisher);
-            bookBefore = bookBefore.Include(x => x.ApplicationUser);
-
-            var book = await bookBefore.FirstOrDefaultAsync();
+            var book = await bookRepository
+                         .AllAsNoTracking()
+                         .Where(x => x.Id == id)
+                         .Include(x => x.Author)
+                         .Include(x => x.Genre)
+                         .Include(x => x.Publisher)
+                         .Include(x => x.ApplicationUser)
+                         .FirstOrDefaultAsync();
 
             if (book == null) throw new NotFoundException($"No book with this id: {id}");
 
@@ -99,7 +101,13 @@ namespace BookWebAPI.Services
 
             if (bookForUpdate == null) throw new NotFoundException($"No book with this id : {id}");
 
-            await SetBookPropertiesAsync(model, bookForUpdate, authorService, publisherService, genreService);
+            //var bookForUpdate2 = await bookRepository.All().
+            //    Include(x=> x.Author)
+            //    .Include(x=> x.Genre)
+            //    .Include(x=> x.Publisher)
+            //    .FirstOrDefaultAsync(x => x.Id == id);
+
+
             var user = await userManager.FindByIdAsync(model.UserId);
 
 
@@ -128,24 +136,5 @@ namespace BookWebAPI.Services
             bookRepository.Delete(bookForDelete);
             await bookRepository.SaveChangesAsync();
         }
-
-
-        private static async Task SetBookPropertiesAsync(InputBookDto model,
-            Book book, IAuthorService authorService, IPublisherService publiherService,
-            IGenreService genreService)
-        {
-            var author = await authorService.GetByNameAsync(model.AuthorFirstName, model.AuthorLastName);
-            book.Author = author;
-            book.AuthorId = author.Id;
-
-            var publisher = await publiherService.GetByNameAsync(model.PublisherName);
-            book.Publisher = publisher;
-            book.PublisherId = publisher.Id;
-
-            var genre = await genreService.GetByNameAsync(model.Genre);
-            book.Genre = genre;
-            book.GenreId = genre.Id;
-        }
-
     }
 }

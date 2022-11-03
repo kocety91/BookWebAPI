@@ -1,16 +1,17 @@
 ﻿using BookWebAPI.Data;
 using BookWebAPI.Models;
+using BookWebAPI.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookWebAPI.Services
 {
     public class GenreService : IGenreService
     {
-        private readonly BookDbContext db;
+        private readonly IRepository<Genre> genreReposiory;
 
-        public GenreService(BookDbContext db)
+        public GenreService(IRepository<Genre> genreReposiory)
         {
-            this.db = db;
+            this.genreReposiory = genreReposiory;
         }
 
         public async Task<Genre> CreateAsync(string genre)
@@ -21,15 +22,15 @@ namespace BookWebAPI.Services
                 CreatedOn = DateTime.Now
             };
 
-            await db.Genres.AddAsync(addedGenre);
-            await db.SaveChangesAsync();
+            await genreReposiory.AddAsync(addedGenre);
+            await genreReposiory.SaveChangesAsync();
 
             return addedGenre;
         }
 
         public async Task<Genre> GetByNameAsync(string genre)
         {
-            var searchedGenre = await db.Genres.FirstOrDefaultAsync(x => x.Name == genre);
+            var searchedGenre = await genreReposiory.AllAsNoTracking().FirstOrDefaultAsync(x => x.Name == genre);
 
             if (searchedGenre == null)
             {

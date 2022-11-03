@@ -9,9 +9,8 @@ namespace BookWebAPI.Configurations
         public void Configure(EntityTypeBuilder<Publisher> builder)
         {
             builder.Property(x => x.Name).HasMaxLength(20).IsRequired();
-            builder.HasMany(x => x.Books).WithOne(b => b.Publisher)
-                .HasForeignKey(b => b.PublisherId)
-                .OnDelete(DeleteBehavior.Restrict);
+            //builder.HasMany(x => x.Books).WithOne(b => b.Publisher)
+            //    .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

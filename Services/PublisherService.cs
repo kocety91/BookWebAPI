@@ -1,16 +1,16 @@
-﻿using BookWebAPI.Data;
-using BookWebAPI.Models;
+﻿using BookWebAPI.Models;
+using BookWebAPI.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookWebAPI.Services
 {
     public class PublisherService : IPublisherService
     {
-        private readonly BookDbContext db;
+        private readonly IRepository<Publisher> publisherRepository;
 
-        public PublisherService(BookDbContext db)
+        public PublisherService(IRepository<Publisher> publisherRepository)
         {
-            this.db = db;
+            this.publisherRepository = publisherRepository;
         }
         public async Task<Publisher> CreateAsync(string publisher)
         {
@@ -20,15 +20,16 @@ namespace BookWebAPI.Services
                 CreatedOn = DateTime.Now
             };
 
-            await db.Publishers.AddAsync(addedPublisher);
-            await db.SaveChangesAsync();
+            await publisherRepository.AddAsync(addedPublisher);
+            await publisherRepository.SaveChangesAsync();
 
             return addedPublisher;
         }
 
         public async Task<Publisher> GetByNameAsync(string publisher)
         {
-            var searchedPublisher = await db.Publishers.FirstOrDefaultAsync(x => x.Name == publisher);
+            var searchedPublisher = await publisherRepository.AllAsNoTracking()
+                .FirstOrDefaultAsync(x => x.Name == publisher);
 
             if (searchedPublisher == null)
             {

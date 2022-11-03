@@ -14,10 +14,9 @@ namespace BookWebAPI.Configurations
                 .WithOne(t => t.ApplicationUser).HasForeignKey(t => t.ApplicationUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
-            builder.HasMany(x => x.Books)
-               .WithOne(b => b.ApplicationUser).HasForeignKey(x => x.ApplicationUserId)
-               .OnDelete(DeleteBehavior.Restrict);
+            //builder.HasMany(x => x.Books)
+            //   .WithOne(b => b.ApplicationUser).HasForeignKey(x => x.ApplicationUserId)
+            //   .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(x => x.Roles)
                 .WithOne().HasForeignKey(r => r.UserId)

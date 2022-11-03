@@ -4,7 +4,7 @@ namespace BookWebAPI.Services
 {
     public interface IBookService
     {
-        Task<OutputBookDto> CreateAsync(InputBookDto model);
+        Task<string> CreateAsync(InputBookDto model);
 
         Task<OutputBookDto> GetByIdAsync(string id);
 

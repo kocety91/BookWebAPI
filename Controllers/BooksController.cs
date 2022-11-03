@@ -19,9 +19,8 @@ namespace BookWebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> Create([FromBody] InputBookDto model)
         {
-            var response = await service.CreateAsync(model);
-           // return this.RedirectToAction(nameof(GetById),new { id = response.Id});
-           return Ok(response);
+            var responseId = await service.CreateAsync(model);
+            return CreatedAtAction(nameof(GetById), new { id = responseId} , model);
         }
 
 

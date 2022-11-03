@@ -14,7 +14,6 @@ namespace BookWebAPI.Profiles
                 .ForMember(x => x.Genre,y => y.MapFrom(b => b.Genre.Name))
                 .ForMember(x => x.AddedByUser, y => y.MapFrom(b => b.ApplicationUser.UserName))
                 .ReverseMap();
-               
         }
     }
 }
