@@ -60,7 +60,6 @@ namespace BookWebAPI.Services
             await bookRepository.SaveChangesAsync();
 
             return book.Id;
-           //return mapper.Map<OutputBookDto>(book);
         }
 
         public async Task<OutputBookDto> GetByIdAsync(string id)
@@ -82,10 +81,12 @@ namespace BookWebAPI.Services
 
         public async Task<IEnumerable<OutputBookDto>> GetAllAsync()
         {
-            var books = bookRepository.AllAsNoTracking().Include(x => x.Author).AsQueryable();
-            books = books.Include(x => x.Genre);
-            books = books.Include(x => x.Publisher);
-            books = books.Include(x => x.ApplicationUser);
+            var books = bookRepository
+                .AllAsNoTracking()
+                .Include(x => x.Author)
+                .Include(x => x.Genre)
+                .Include(x => x.Publisher)
+                .Include(x => x.ApplicationUser);
 
             var booksAfter = await books.ToListAsync();
 
@@ -97,19 +98,17 @@ namespace BookWebAPI.Services
         {
             if (model == null) throw new NullReferenceException(nameof(model));
 
-            var bookForUpdate = await bookRepository.All().FirstOrDefaultAsync(x => x.Id == id);
+            var bookForUpdate = await bookRepository
+                .All()
+                .Include(x => x.Author)
+                .Include(x => x.Genre)
+                .Include(x => x.Publisher)
+                .Include(x => x.ApplicationUser)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
             if (bookForUpdate == null) throw new NotFoundException($"No book with this id : {id}");
 
-            //var bookForUpdate2 = await bookRepository.All().
-            //    Include(x=> x.Author)
-            //    .Include(x=> x.Genre)
-            //    .Include(x=> x.Publisher)
-            //    .FirstOrDefaultAsync(x => x.Id == id);
-
-
             var user = await userManager.FindByIdAsync(model.UserId);
-
 
             bookForUpdate.Name = model.Name;
             bookForUpdate.Price = model.Price;
