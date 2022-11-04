@@ -22,7 +22,7 @@ namespace BookWebAPI.Services
             IPublisherService publisherService,
             IGenreService genreService,
             IAuthorService authorService,
-             UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager)
         {
             this.bookRepository = bookRepository;
             this.mapper = mapper;
