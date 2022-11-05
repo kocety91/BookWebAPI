@@ -50,15 +50,12 @@ namespace BookWebAPI.Tests.Services
         public async Task GetAuthorNameShouldReturnCorrectValue(string firstName, string lastName)
         {
             var mockedRepo = new Mock<EfRepository<Author>>(_dbContext);
-
             mockedRepo.Setup(x => x.AddAsync(It.IsAny<Author>()))
                 .Callback((Author author) => _dbContext.Authors.Add(author));
-
             mockedRepo.Setup(x => x.AllAsNoTracking()).Returns(
                 _dbContext.Authors.AsNoTracking());
 
             var service = new AuthorService(mockedRepo.Object);
-            await service.CreateAsync(firstName, lastName);
 
             var expected = await service.GetByNameAsync(firstName, lastName);
 
