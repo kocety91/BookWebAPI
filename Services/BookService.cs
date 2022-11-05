@@ -80,7 +80,7 @@ namespace BookWebAPI.Services
         public async Task<IEnumerable<OutputBookDto>> GetAllAsync()
         {
             var books = bookRepository
-                .AllAsNoTracking()
+                .All()
                 .Include(x => x.Author)
                 .Include(x => x.Genre)
                 .Include(x => x.Publisher)

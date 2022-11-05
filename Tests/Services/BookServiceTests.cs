@@ -42,6 +42,7 @@ namespace BookWebAPI.Tests.Services
         public async Task CreateAsyncShouldWorksCorrectly(string name, decimal price,
             string authorFirstName, string authorLastName, string publisherName, string genre, string userId)
         {
+
             var booksService = GenerateBookService(userId);
 
             var model = new InputBookDto()
@@ -132,6 +133,137 @@ namespace BookWebAPI.Tests.Services
                 .WithMessage($"No book with this id: {id}");
         }
 
+
+        [Fact]
+        public async Task GetAllAsyncShouldWorksCorrectly()
+        {
+            this.SeedBooks(_dbContext);
+
+            var bookMockedRepo = new Mock<EfRepository<Book>>(_dbContext);
+            bookMockedRepo.Setup(x => x.All()).Returns(_dbContext.Books);
+
+            var booksService = new BookService(bookMockedRepo.Object, _mapper, null, null, null, null);
+
+            var actual = await booksService.GetAllAsync();
+
+            actual.Should().NotBeEmpty().And.HaveCount(1);
+        }
+
+
+        [Theory]
+        [InlineData("SomeBookId")]
+        public async Task DeleteAsyncShouldWorksCorrectly(string id)
+        {
+            this.SeedBooks(_dbContext);
+
+            var bookMockedRepo = new Mock<EfRepository<Book>>(_dbContext);
+            bookMockedRepo.Setup(x => x.All()).Returns(_dbContext.Books);
+            bookMockedRepo.Setup(x => x.Delete(It.IsAny<Book>()))
+                .Callback((Book book) => _dbContext.Books.Remove(book));
+
+            var booksService = new BookService(bookMockedRepo.Object, _mapper, null, null, null, null);
+            await booksService.DeleteAsync(id);
+
+            this._dbContext.Books.Count().Should().Be(0);
+            this._dbContext.Books.Should().BeEmpty();
+        }
+
+        [Theory]
+        [InlineData("ZZZX")]
+        public async Task DeleteAsyncShouldThrowNotFoundException(string id)
+        {
+            this.SeedBooks(_dbContext);
+
+            var bookMockedRepo = new Mock<EfRepository<Book>>(_dbContext);
+            bookMockedRepo.Setup(x => x.All()).Returns(_dbContext.Books);
+            bookMockedRepo.Setup(x => x.Delete(It.IsAny<Book>()))
+                .Callback((Book book) => _dbContext.Books.Remove(book));
+
+            var booksService = new BookService(bookMockedRepo.Object, _mapper, null, null, null, null);
+
+            await booksService.Invoking(x => x.DeleteAsync(id))
+                 .Should().ThrowAsync<NotFoundException>()
+                 .WithMessage($"Book with id : {id} not found !");
+        }
+
+
+        [Theory]
+        [ClassData(typeof(InputBookData))]
+        public async Task UpdateAsyncShouldWorksCorrectly(string name, decimal price,
+            string authorFirstName, string authorLastName, string publisherName, string genre, string userId)
+        {
+            this.SeedBooks(_dbContext);
+
+            var userManagerMocked = new Mock<UserManager<ApplicationUser>>
+                (Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+            userManagerMocked.Setup(x => x.FindByIdAsync(It.IsAny<string>()))
+                .ReturnsAsync(new ApplicationUser() { Id = userId });
+
+            var bookMockedRepo = new Mock<EfRepository<Book>>(_dbContext);
+            bookMockedRepo.Setup(x => x.All()).Returns(_dbContext.Books);
+            bookMockedRepo.Setup(x => x.Update(It.IsAny<Book>()))
+            .Callback((Book book) => _dbContext.Books.Update(book));
+
+            var booksService = new BookService(bookMockedRepo.Object, _mapper, null, null, null, userManagerMocked.Object);
+
+            var model = new InputBookDto()
+            {
+                Name = name,
+                Price = price,
+                AuthorFirstName = authorFirstName,
+                AuthorLastName = authorLastName,
+                PublisherName = publisherName,
+                Genre = genre,
+                UserId = userId
+            };
+
+            var updatedBook = await booksService.UpdateAsync("SomeBookId", model);
+
+            updatedBook.Name.Should().BeEquivalentTo(name);
+            updatedBook.AuthorFullName.Should().BeEquivalentTo(authorFirstName + " " +authorLastName);
+            updatedBook.Price.Should().Be(price);
+            this._dbContext.Books.Count().Should().Be(1);
+            this._dbContext.Books.Should().NotBeEmpty();
+
+        }
+
+
+        [Theory]
+        [ClassData(typeof(InputBookData))]
+        public async Task UpdateAsyncShoudThrowNotFoundException(string name, decimal price,
+            string authorFirstName, string authorLastName, string publisherName, string genre, string userId)
+        {
+            this.SeedBooks(_dbContext);
+
+            var userManagerMocked = new Mock<UserManager<ApplicationUser>>
+                (Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+            userManagerMocked.Setup(x => x.FindByIdAsync(It.IsAny<string>()))
+                .ReturnsAsync(new ApplicationUser() { Id = userId });
+
+            var bookMockedRepo = new Mock<EfRepository<Book>>(_dbContext);
+            bookMockedRepo.Setup(x => x.All()).Returns(_dbContext.Books);
+            bookMockedRepo.Setup(x => x.Update(It.IsAny<Book>()))
+            .Callback((Book book) => _dbContext.Books.Update(book));
+
+            var booksService = new BookService(bookMockedRepo.Object, _mapper, null, null, null, userManagerMocked.Object);
+
+            var model = new InputBookDto()
+            {
+                Name = name,
+                Price = price,
+                AuthorFirstName = authorFirstName,
+                AuthorLastName = authorLastName,
+                PublisherName = publisherName,
+                Genre = genre,
+                UserId = userId
+            };
+
+            await booksService.Invoking(x => x.UpdateAsync("someDDSAksaod",model))
+                .Should().ThrowAsync<NotFoundException>()
+                .WithMessage($"No book with this id : {"someDDSAksaod"}");
+        }
+
+
         private BookService GenerateBookService(string userId)
         {
             //books
@@ -167,13 +299,12 @@ namespace BookWebAPI.Tests.Services
             genreMockedRepo.Setup(x => x.AddAsync(It.IsAny<Genre>()))
                .Callback((Genre genre) => _dbContext.Genres.AddAsync(genre));
 
-            var mapperMocked = new Mock<IMapper>();
 
             var publisherService = new PublisherService(publisherMockedRepo.Object);
             var genreService = new GenreService(genreMockedRepo.Object);
             var authorService = new AuthorService(authorMockedRepo.Object);
 
-            var booksService = new BookService(bookMockedRepo.Object, mapperMocked.Object,
+            var booksService = new BookService(bookMockedRepo.Object, this._mapper,
                 publisherService, genreService, authorService, userManagerMocked.Object);
             return booksService;
         }
