@@ -37,8 +37,6 @@ namespace BookWebAPI.Services
             var searchedBook = await bookRepository.All().FirstOrDefaultAsync(x => x.Name == model.Name);
             if (searchedBook != null) throw new ArgumentException($"Book with {model.Name} already exist!");
 
-            if (model == null) throw new NullReferenceException(nameof(model));
-
             var user = await userManager.FindByIdAsync(model.UserId);
             var author = await authorService.GetByNameAsync(model.AuthorFirstName, model.AuthorLastName);
             var publisher = await publisherService.GetByNameAsync(model.PublisherName);

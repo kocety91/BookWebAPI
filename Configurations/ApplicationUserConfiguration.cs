@@ -8,7 +8,7 @@ namespace BookWebAPI.Configurations
     {
         public void Configure(EntityTypeBuilder<ApplicationUser> builder)
         {
-            builder.Property(x => x.Country).IsRequired();
+            builder.Property(x => x.Country).IsRequired(false);
 
             builder.HasMany(x => x.RefreshTokens)
                 .WithOne(t => t.ApplicationUser).HasForeignKey(t => t.ApplicationUserId)
