@@ -2,6 +2,7 @@
 using BookWebAPI.Data;
 using BookWebAPI.Dtos.Books;
 using BookWebAPI.Models;
+using BookWebAPI.Profiles;
 using BookWebAPI.Repositories;
 using BookWebAPI.Services;
 using BookWebAPI.Tests.InputModels;
@@ -10,24 +11,35 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
+using static BookWebAPI.Common.CustomExceptions;
 
 namespace BookWebAPI.Tests.Services
 {
     public class BookServiceTests
     {
         private readonly BookDbContext _dbContext;
-
+        private readonly IMapper _mapper;
         public BookServiceTests()
         {
             var options = new DbContextOptionsBuilder<BookDbContext>()
            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
 
             _dbContext = new BookDbContext(options);
+
+            if (_mapper == null)
+            {
+                var mappingConfig = new MapperConfiguration(cfg =>
+                {
+                    cfg.AddProfile(new BookProfile());
+                });
+                IMapper mapper = mappingConfig.CreateMapper();
+                _mapper = mapper;
+            }
         }
 
         [Theory]
         [ClassData(typeof(InputBookData))]
-        public async Task CreateAsyncWorksCorrectly(string name, decimal price,
+        public async Task CreateAsyncShouldWorksCorrectly(string name, decimal price,
             string authorFirstName, string authorLastName, string publisherName, string genre, string userId)
         {
             var booksService = GenerateBookService(userId);
@@ -81,6 +93,44 @@ namespace BookWebAPI.Tests.Services
         }
 
 
+        [Theory]
+        [InlineData("SomeBookId")]
+        public async Task GetByIdAsyncShouldWorksCorrectly(string id)
+        {
+            this.SeedBooks(_dbContext);
+
+            var bookMockedRepo = new Mock<EfRepository<Book>>(_dbContext);
+            bookMockedRepo.Setup(x => x.All()).Returns(_dbContext.Books);
+
+            var booksService = new BookService(bookMockedRepo.Object, _mapper, null, null, null, null);
+
+            var expected = await _dbContext.Books.FirstOrDefaultAsync();
+
+            var actual = await booksService.GetByIdAsync(id);
+
+            actual.Id.Should().BeEquivalentTo(expected.Id);
+            actual.Id.Should().NotBeNull().Should().NotBeOfType<NotFoundException>();
+            actual.Name.Should().BeEquivalentTo(expected.Name);
+            actual.AuthorFullName.Should().BeEquivalentTo(expected.Author.FirstName + " " + expected.Author.LastName);
+            actual.Price.Should().Be(expected.Price);
+        }
+
+
+        [Theory]
+        [InlineData("RandomBookId")]
+        public async Task GetByIdAsyncShouldThrowNotFoundException(string id)
+        {
+            this.SeedBooks(_dbContext);
+
+            var bookMockedRepo = new Mock<EfRepository<Book>>(_dbContext);
+            bookMockedRepo.Setup(x => x.All()).Returns(_dbContext.Books);
+
+            var booksService = new BookService(bookMockedRepo.Object, _mapper, null, null, null, null);
+
+            await booksService.Invoking(x => x.GetByIdAsync(id))
+                .Should().ThrowAsync<NotFoundException>()
+                .WithMessage($"No book with this id: {id}");
+        }
 
         private BookService GenerateBookService(string userId)
         {
@@ -117,9 +167,7 @@ namespace BookWebAPI.Tests.Services
             genreMockedRepo.Setup(x => x.AddAsync(It.IsAny<Genre>()))
                .Callback((Genre genre) => _dbContext.Genres.AddAsync(genre));
 
-
             var mapperMocked = new Mock<IMapper>();
-
 
             var publisherService = new PublisherService(publisherMockedRepo.Object);
             var genreService = new GenreService(genreMockedRepo.Object);
@@ -128,6 +176,26 @@ namespace BookWebAPI.Tests.Services
             var booksService = new BookService(bookMockedRepo.Object, mapperMocked.Object,
                 publisherService, genreService, authorService, userManagerMocked.Object);
             return booksService;
+        }
+
+        private void SeedBooks(BookDbContext db)
+        {
+            var book = new Book()
+            {
+                Id = "SomeBookId",
+                Name = "BookName",
+                Author = new Author() { Id = "SomeAuthorId", FirstName = "Koce", LastName = "Kocev" },
+                AuthorId = "SomeAuthorId",
+                ApplicationUser = new ApplicationUser() { Id = "SomeUserId", },
+                ApplicationUserId = "SomeUserId",
+                Genre = new Genre() { Id = "SomeGenreId", Name = "GenreName" },
+                GenreId = "SomeGenreId",
+                Publisher = new Publisher() { Id = "SOmePublisherId", Name = "PublisherName" },
+                PublisherId = "SOmePublisherId",
+                Price = 199
+            };
+            db.Books.Add(book);
+            db.SaveChanges();
         }
     }
 }

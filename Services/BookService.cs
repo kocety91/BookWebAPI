@@ -63,7 +63,7 @@ namespace BookWebAPI.Services
         public async Task<OutputBookDto> GetByIdAsync(string id)
         {
             var book = await bookRepository
-                         .AllAsNoTracking()
+                         .All()
                          .Where(x => x.Id == id)
                          .Include(x => x.Author)
                          .Include(x => x.Genre)
