@@ -14,6 +14,14 @@ namespace BookWebAPI.Controllers
             this.service = service;
         }
 
+        [HttpGet]
+        [Route("/koce")]
+        public IActionResult Koce()
+        {
+            return this.Ok();
+        }
+
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
