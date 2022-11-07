@@ -35,7 +35,7 @@ namespace BookWebAPI.Services
         public async Task<string> CreateAsync(InputBookDto model)
         {
             var searchedBook = await bookRepository.All().FirstOrDefaultAsync(x => x.Name == model.Name);
-            if (searchedBook != null) throw new ArgumentException($"Book with {model.Name} already exist!");
+            if (searchedBook != null) throw new ExistsException($"Book with name: {model.Name} already exist!");
 
             var user = await userManager.FindByIdAsync(model.UserId);
             var author = await authorService.GetByNameAsync(model.AuthorFirstName, model.AuthorLastName);
