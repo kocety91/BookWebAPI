@@ -5,18 +5,12 @@ using BookWebAPI.Models;
 
 namespace BookWebAPI.Tests
 {
-    public class TestingWebAppFactory<TEntryPoint> : WebApplicationFactory<Program> 
+    public class TestingWebAppFactory<TEntryPoint> : WebApplicationFactory<Program>
         where TEntryPoint : Program
     {
-        private readonly ILogger<TestingWebAppFactory<Program>> logger;
-
-        public TestingWebAppFactory(ILogger<TestingWebAppFactory<Program>> logger)
-        {
-            this.logger = logger;
-        }
-
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            builder.UseContentRoot(Directory.GetCurrentDirectory());
             builder.ConfigureServices(services =>
             {
                 var descriptor = services.SingleOrDefault(
@@ -34,14 +28,7 @@ namespace BookWebAPI.Tests
                 using (var scope = sp.CreateScope())
                 using (var appContext = scope.ServiceProvider.GetRequiredService<BookDbContext>())
                 {
-                    try
-                    {
-                        this.SeedBooks(appContext);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex.StackTrace);
-                    }
+                    this.SeedBooks(appContext);
                 }
             });
         }
@@ -68,14 +55,14 @@ namespace BookWebAPI.Tests
             {
                 Id = "bookTwoId",
                 Name = "bookTwo",
-                Author = new Author() { Id = "SomeAuthorId", FirstName = "Koce", LastName = "Kocev" },
-                AuthorId = "SomeAuthorId",
-                ApplicationUser = new ApplicationUser() { Id = "SomeUserId", },
-                ApplicationUserId = "SomeUserId",
-                Genre = new Genre() { Id = "SomeGenreId", Name = "GenreName" },
-                GenreId = "SomeGenreId",
-                Publisher = new Publisher() { Id = "SOmePublisherId", Name = "PublisherName" },
-                PublisherId = "SOmePublisherId",
+                Author = new Author() { Id = "bookTwoSomeAuthorId", FirstName = "bookTwoKoce", LastName = "bookTwoKocev" },
+                AuthorId = "bookTwoSomeAuthorId",
+                ApplicationUser = new ApplicationUser() { Id = "bookTwoSomeUserId", },
+                ApplicationUserId = "bookTwoSomeUserId",
+                Genre = new Genre() { Id = "bookTwoSomeGenreId", Name = "bookTwoGenreName" },
+                GenreId = "bookTwoSomeGenreId",
+                Publisher = new Publisher() { Id = "bookTwoSOmePublisherId", Name = "bookTwoPublisherName" },
+                PublisherId = "bookTwoSOmePublisherId",
                 Price = 199
             };
             books.Add(bookTwo);

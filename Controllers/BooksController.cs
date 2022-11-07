@@ -1,5 +1,6 @@
 ﻿using BookWebAPI.Dtos.Books;
 using BookWebAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookWebAPI.Controllers
@@ -12,13 +13,6 @@ namespace BookWebAPI.Controllers
         public BooksController(IBookService service)
         {
             this.service = service;
-        }
-
-        [HttpGet]
-        [Route("/koce")]
-        public IActionResult Koce()
-        {
-            return this.Ok();
         }
 
 
@@ -60,6 +54,7 @@ namespace BookWebAPI.Controllers
         }
 
         [HttpDelete, Route("{id}")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Delete([FromRoute] string id)

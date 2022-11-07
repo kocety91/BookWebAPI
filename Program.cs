@@ -1,7 +1,4 @@
-using BookWebAPI.Data;
 using BookWebAPI.Extensions;
-using BookWebAPI.Seeding;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
@@ -19,14 +16,6 @@ builder.Services
 
 
 var app = builder.Build();
-
-
-using (var serviceScope = app.Services.CreateScope())
-{
-    var dbContext = serviceScope.ServiceProvider.GetRequiredService<BookDbContext>();
-    dbContext.Database.Migrate();
-    new BookDbContextSeeder().SeedAsync(dbContext, serviceScope.ServiceProvider).GetAwaiter().GetResult();
-}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
